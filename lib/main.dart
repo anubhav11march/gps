@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:gps/screens/alert_type.dart';
+import 'package:gps/screens/forgot_pwd.dart';
+import 'package:gps/screens/select_vehicles.dart';
+import 'package:gps/screens/share_truck.dart';
 
 void main() {
   runApp(const MyApp());
