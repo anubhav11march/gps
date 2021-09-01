@@ -1,7 +1,12 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:gps/models/user.dart';
+import 'package:gps/navigation/tab_bar.dart';
+import 'package:http/http.dart' as http;
 import 'package:gps/screens/alert_type.dart';
-import 'package:gps/screens/forgot_pwd.dart';
+import 'package:gps/login/forgot_pwd.dart';
 import 'package:gps/screens/select_vehicles.dart';
 import 'package:gps/screens/share_truck.dart';
 
@@ -34,6 +39,12 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  bool invalidStatus = false;
+  var defaultUrl =
+      "https://bgps.online/api/api.php?api=user&ver=3.9&key=7FBE348595882D7057EC6A08AC020000&cmd=LOGIN_CHECK,";
+  var url =
+      "https://bgps.online/api/api.php?api=user&ver=3.9&key=7FBE348595882D7057EC6A08AC020000&cmd=LOGIN_CHECK,";
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -77,9 +88,17 @@ class _LoginScreenState extends State<LoginScreen> {
                   margin: const EdgeInsets.all(15),
                   child: TextField(
                     controller: loginIdCtrl,
-                    decoration: const InputDecoration(
-                      hintText: "User Name",
-                    ),
+                    decoration: InputDecoration(
+                        hintText: invalidStatus
+                            ? "Invalid Username/Password"
+                            : "User Name",
+                        hintStyle: TextStyle(
+                            color: invalidStatus ? Colors.red : Colors.grey)),
+                    onChanged: (value) {
+                      setState(() {
+                        invalidStatus = false;
+                      });
+                    },
                   ),
                 ),
                 Container(
@@ -87,6 +106,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   child: TextField(
                     controller: pass,
                     keyboardType: TextInputType.visiblePassword,
+                    obscureText: true,
                     decoration: const InputDecoration(
                         hintText: "Password", disabledBorder: InputBorder.none),
                   ),
@@ -107,8 +127,27 @@ class _LoginScreenState extends State<LoginScreen> {
                     style: ElevatedButton.styleFrom(
                       primary: const Color(0xFF144B7B),
                     ),
-                    onPressed: () {
+                    onPressed: () async {
                       // sendReq(context);
+                      url += loginIdCtrl.text + "," + pass.text;
+                      var response = await http.get(Uri.parse(url));
+                      var result = json.decode(response.body);
+                      print(result["status"]);
+                      User user;
+                      user = new User(loginIdCtrl.text);
+                      if (result["status"] == "Success") {
+                        Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => tabBar(user)));
+                      } else {
+                        url = defaultUrl;
+                        setState(() {
+                          invalidStatus = true;
+                          loginIdCtrl.text = "";
+                          pass.text = "";
+                        });
+                      }
                     },
                     child: Container(
                       padding: const EdgeInsets.symmetric(
