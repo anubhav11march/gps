@@ -9,11 +9,11 @@ class MapScreen extends StatefulWidget {
 }
 
 class MapState extends State<MapScreen> {
+
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
     return Scaffold(
-      backgroundColor: Colors.green,
+      backgroundColor: Colors.red,
     );
   }
 }
